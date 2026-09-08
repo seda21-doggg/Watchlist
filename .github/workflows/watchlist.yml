@@ -1,0 +1,57 @@
+name: Watchlist
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Monday mornings, UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install -r requirements.txt
+
+      - name: Generate watchlist
+        run: python scripts/generate_watchlist.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "watchlist-bot"
+          git config user.email "actions@github.com"
+          git add watchlist.json history/ site/index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Watchlist update $(date -u +%F)"
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt/5) — remote moved (e.g. a manual push, or the "
+            echo "editor committing to watchlist.json), rebasing and retrying..."
+            git pull --rebase origin main
+          done
+          echo "Failed to push after 5 attempts." >&2
+          exit 1
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - uses: actions/deploy-pages@v4

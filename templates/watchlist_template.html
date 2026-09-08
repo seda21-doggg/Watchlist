@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watchlist — {{ date }}</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 960px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; background: #fafafa; }
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.1rem; color: #666; font-weight: normal; margin-top: 32px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; white-space: nowrap; }
+  th { color: #666; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
+  tr.growth-positive td.growth-cell { color: #1a7f37; font-weight: bold; }
+  tr.growth-negative td.growth-cell { color: #c0392b; font-weight: bold; }
+  tr.momentum-accelerating td.momentum-cell { color: #1a7f37; font-weight: bold; }
+  tr.momentum-decelerating td.momentum-cell { color: #c0392b; font-weight: bold; }
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.75rem; background: #eee; }
+  .badge.gold { background: #fff3cd; }
+  .muted { color: #999; }
+  input.growth-input { width: 52px; padding: 2px 4px; }
+  #editor ul { list-style: none; padding: 0; }
+  #editor li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+  #editor button.remove { color: #c0392b; background: none; border: 1px solid #c0392b; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+  #editor button.save-target { border: 1px solid #2563eb; color: #2563eb; background: none; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+  #add-form { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  #add-form input { flex: 1; min-width: 100px; padding: 6px; }
+  #status { font-size: 0.85rem; color: #666; margin-top: 12px; }
+  .empty { color: #999; font-style: italic; }
+</style>
+</head>
+<body>
+<h1>Watchlist</h1>
+<p class="muted">Last updated {{ date }}. Growth surprise compares actual most-recent-quarter YoY EPS growth to the expected long-term target. Momentum splits trend (price vs 50d/200d SMA) from acceleration (is the 3-month rate of change itself speeding up or slowing down).</p>
+
+<h2>Companies</h2>
+{% if items %}
+<div style="overflow-x:auto">
+<table>
+  <thead>
+    <tr>
+      <th>Ticker</th>
+      <th>Company</th>
+      <th>Mkt Cap</th>
+      <th>P/E (LTM)</th>
+      <th>Expected growth</th>
+      <th>Actual growth</th>
+      <th>Trend</th>
+      <th>Momentum</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in items %}
+    <tr class="growth-{{ i.growth_flag|lower|replace('_','-') }} momentum-{{ i.momentum_flag|lower|replace('_','-') }}">
+      <td><strong>{{ i.tk }}</strong></td>
+      <td>{{ i.co }} <span class="muted">({{ i.ex }})</span></td>
+      <td>{{ i.market_cap|market_cap }}</td>
+      <td>{{ i.pe_ltm|num }}</td>
+      <td>{{ i.expected_eps_growth_pct }}%</td>
+      <td class="growth-cell">{{ i.actual_eps_growth_pct|pct }}
+        {% if i.growth_flag == 'POSITIVE' %}<span class="badge">beat</span>
+        {% elif i.growth_flag == 'NEGATIVE' %}<span class="badge">miss</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if i.sma_50 and i.sma_200 %}
+          {% if i.price > i.sma_50 and i.price > i.sma_200 %}Above both
+          {% elif i.price > i.sma_50 %}Above 50d only
+          {% elif i.price > i.sma_200 %}Above 200d only
+          {% else %}Below both
+          {% endif %}
+          {% if i.golden_cross %}<span class="badge gold">golden cross</span>{% else %}<span class="badge">death cross</span>{% endif %}
+        {% else %}<span class="muted">—</span>{% endif %}
+      </td>
+      <td class="momentum-cell">{{ i.momentum_flag|lower|replace('_',' ') }}
+        {% if i.roc_3m_pct is not none %}<span class="muted">({{ i.roc_3m_pct|num }}% vs {{ i.roc_3m_prior_pct|num }}%)</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="empty">No companies on the watchlist yet — add one below.</p>
+{% endif %}
+
+<h2>Edit watchlist</h2>
+<p class="muted">Remove a company, adjust its expected long-term EPS growth target, or add a new one. Changes commit directly to <code>watchlist.json</code> in the repo and apply from the next scheduled run.</p>
+<div id="editor">
+  <ul id="company-list">
+    {% for c in watchlist %}
+    <li data-tk="{{ c.tk }}">
+      <span><strong>{{ c.tk }}</strong> — {{ c.co }} ({{ c.ex }})</span>
+      <span>
+        target
+        <input type="number" class="growth-input" step="0.5" value="{{ c.expected_eps_growth_pct }}" data-tk="{{ c.tk }}">%
+        <button class="save-target" data-tk="{{ c.tk }}">Save</button>
+      </span>
+      <button class="remove" data-tk="{{ c.tk }}">Remove</button>
+    </li>
+    {% endfor %}
+  </ul>
+  <form id="add-form">
+    <input id="add-tk" placeholder="Ticker (e.g. NVDA)" required>
+    <input id="add-co" placeholder="Company name" required>
+    <input id="add-ex" placeholder="Exchange (e.g. NASDAQ)" required>
+    <input id="add-growth" type="number" step="0.5" placeholder="Expected growth %" required>
+    <button type="submit">Add</button>
+  </form>
+  <div id="status"></div>
+</div>
+
+<script>
+const GH_OWNER = {{ gh_owner|tojson }};
+const GH_REPO = {{ gh_repo|tojson }};
+const FILE_PATH = "watchlist.json";
+const TOKEN_KEY = "watchlist_gh_pat";
+let currentList = {{ watchlist|tojson }};
+
+function getToken() {
+  let token = localStorage.getItem(TOKEN_KEY);
+  if (!token) {
+    token = prompt(
+      "Enter a GitHub fine-grained Personal Access Token, scoped only to the " +
+      GH_OWNER + "/" + GH_REPO + " repo, with Contents: read/write permission.\n" +
+      "It is stored in this browser only (localStorage) and sent only to api.github.com."
+    );
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+  }
+  return token;
+}
+
+async function githubApi(path, options = {}) {
+  const token = getToken();
+  if (!token) throw new Error("No token provided");
+  const resp = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/${path}`, {
+    ...options,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {}),
+    },
+  });
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`GitHub API ${resp.status}: ${body}`);
+  }
+  return resp.json();
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function saveList(newList, message) {
+  const status = document.getElementById("status");
+  status.textContent = "Saving...";
+  try {
+    const current = await githubApi(`contents/${FILE_PATH}`);
+    const content = b64EncodeUnicode(JSON.stringify(newList, null, 2) + "\n");
+    await githubApi(`contents/${FILE_PATH}`, {
+      method: "PUT",
+      body: JSON.stringify({ message, content, sha: current.sha }),
+    });
+    currentList = newList;
+    status.textContent = "Saved. Takes effect on the next scheduled run.";
+  } catch (e) {
+    status.textContent = "Error: " + e.message;
+    console.error(e);
+  }
+}
+
+function attachRemoveHandler(btn) {
+  btn.addEventListener("click", async () => {
+    const tk = btn.dataset.tk;
+    const newList = currentList.filter(c => c.tk !== tk);
+    await saveList(newList, `Remove ${tk} from watchlist`);
+    btn.closest("li").remove();
+  });
+}
+
+function attachSaveTargetHandler(btn) {
+  btn.addEventListener("click", async () => {
+    const tk = btn.dataset.tk;
+    const input = document.querySelector(`input.growth-input[data-tk="${tk}"]`);
+    const value = parseFloat(input.value);
+    if (Number.isNaN(value)) return;
+    const newList = currentList.map(c => c.tk === tk ? { ...c, expected_eps_growth_pct: value } : c);
+    await saveList(newList, `Update ${tk} expected growth to ${value}%`);
+  });
+}
+
+document.querySelectorAll("button.remove").forEach(attachRemoveHandler);
+document.querySelectorAll("button.save-target").forEach(attachSaveTargetHandler);
+
+document.getElementById("add-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const tk = document.getElementById("add-tk").value.trim().toUpperCase();
+  const co = document.getElementById("add-co").value.trim();
+  const ex = document.getElementById("add-ex").value.trim();
+  const expected_eps_growth_pct = parseFloat(document.getElementById("add-growth").value);
+  if (!tk || !co || !ex || Number.isNaN(expected_eps_growth_pct)) return;
+  const newList = currentList.concat([{ tk, co, ex, expected_eps_growth_pct }]);
+  await saveList(newList, `Add ${tk} to watchlist`);
+  const li = document.createElement("li");
+  li.dataset.tk = tk;
+  li.innerHTML = `<span><strong>${tk}</strong> — ${co} (${ex})</span>
+    <span>target <input type="number" class="growth-input" step="0.5" value="${expected_eps_growth_pct}" data-tk="${tk}">% <button class="save-target" data-tk="${tk}">Save</button></span>
+    <button class="remove" data-tk="${tk}">Remove</button>`;
+  document.getElementById("company-list").appendChild(li);
+  attachRemoveHandler(li.querySelector("button.remove"));
+  attachSaveTargetHandler(li.querySelector("button.save-target"));
+  e.target.reset();
+});
+</script>
+</body>
+</html>
