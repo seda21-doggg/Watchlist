@@ -4,5 +4,11 @@
     "co": "Distribution Finance Capital",
     "ex": "AIM",
     "expected_eps_growth_pct": 15
+  },
+  {
+    "tk": "212A.T",
+    "co": "Fit Easy",
+    "ex": "Tokyo",
+    "expected_eps_growth_pct": 30
   }
 ]
