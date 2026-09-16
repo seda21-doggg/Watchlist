@@ -16,5 +16,11 @@
     "co": "Uber",
     "ex": "Nasdaq",
     "expected_eps_growth_pct": 20
+  },
+  {
+    "tk": "GRBK",
+    "co": "Green Brick Partners",
+    "ex": "Nyse",
+    "expected_eps_growth_pct": 15
   }
 ]
