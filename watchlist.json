@@ -10,5 +10,11 @@
     "co": "Fit Easy",
     "ex": "Tokyo",
     "expected_eps_growth_pct": 30
+  },
+  {
+    "tk": "UBER",
+    "co": "Uber",
+    "ex": "Nasdaq",
+    "expected_eps_growth_pct": 20
   }
 ]
