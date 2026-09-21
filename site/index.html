@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchlist — 2026-09-14</title>
+<title>Watchlist — 2026-09-21</title>
 <style>
   body { font-family: -apple-system, system-ui, sans-serif; max-width: 960px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; background: #fafafa; }
   h1 { font-size: 1.4rem; }
@@ -31,17 +31,157 @@
 </head>
 <body>
 <h1>Watchlist</h1>
-<p class="muted">Last updated 2026-09-14. Growth surprise compares actual most-recent-quarter YoY EPS growth to the expected long-term target. Momentum splits trend (price vs 50d/200d SMA) from acceleration (is the 3-month rate of change itself speeding up or slowing down).</p>
+<p class="muted">Last updated 2026-09-21. Growth surprise compares actual most-recent-quarter YoY EPS growth to the expected long-term target. Momentum splits trend (price vs 50d/200d SMA) from acceleration (is the 3-month rate of change itself speeding up or slowing down).</p>
 
 <h2>Companies</h2>
 
-<p class="empty">No companies on the watchlist yet — add one below.</p>
+<div style="overflow-x:auto">
+<table>
+  <thead>
+    <tr>
+      <th>Ticker</th>
+      <th>Company</th>
+      <th>Mkt Cap</th>
+      <th>P/E (LTM)</th>
+      <th>Expected growth</th>
+      <th>Actual growth</th>
+      <th>Trend</th>
+      <th>Momentum</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr class="growth-unknown momentum-insufficient-data">
+      <td><strong>DFCH</strong></td>
+      <td>Distribution Finance Capital <span class="muted">(AIM)</span></td>
+      <td>—</td>
+      <td>—</td>
+      <td>15%</td>
+      <td class="growth-cell">—
+        
+      </td>
+      <td>
+        <span class="muted">—</span>
+      </td>
+      <td class="momentum-cell">insufficient data
+        
+      </td>
+    </tr>
+    
+    <tr class="growth-in-line momentum-decelerating">
+      <td><strong>212A.T</strong></td>
+      <td>Fit Easy <span class="muted">(Tokyo)</span></td>
+      <td>$46.5B</td>
+      <td>24.4</td>
+      <td>30%</td>
+      <td class="growth-cell">34.4%
+        
+      </td>
+      <td>
+        
+          Above 200d only
+          
+          <span class="badge gold">golden cross</span>
+        
+      </td>
+      <td class="momentum-cell">decelerating
+        <span class="muted">(1.0% vs 14.1%)</span>
+      </td>
+    </tr>
+    
+    <tr class="growth-positive momentum-flat">
+      <td><strong>UBER</strong></td>
+      <td>Uber <span class="muted">(Nasdaq)</span></td>
+      <td>$144.0B</td>
+      <td>15.5</td>
+      <td>20%</td>
+      <td class="growth-cell">76.7%
+        <span class="badge">beat</span>
+        
+      </td>
+      <td>
+        
+          Below both
+          
+          <span class="badge">death cross</span>
+        
+      </td>
+      <td class="momentum-cell">flat
+        <span class="muted">(-1.3% vs -3.0%)</span>
+      </td>
+    </tr>
+    
+    <tr class="growth-negative momentum-decelerating">
+      <td><strong>GRBK</strong></td>
+      <td>Green Brick Partners <span class="muted">(Nyse)</span></td>
+      <td>$2.8B</td>
+      <td>10.0</td>
+      <td>15%</td>
+      <td class="growth-cell">-9.5%
+        <span class="badge">miss</span>
+        
+      </td>
+      <td>
+        
+          Below both
+          
+          <span class="badge gold">golden cross</span>
+        
+      </td>
+      <td class="momentum-cell">decelerating
+        <span class="muted">(-10.0% vs 21.8%)</span>
+      </td>
+    </tr>
+    
+  </tbody>
+</table>
+</div>
 
 
 <h2>Edit watchlist</h2>
 <p class="muted">Remove a company, adjust its expected long-term EPS growth target, or add a new one. Changes commit directly to <code>watchlist.json</code> in the repo and apply from the next scheduled run.</p>
 <div id="editor">
   <ul id="company-list">
+    
+    <li data-tk="DFCH">
+      <span><strong>DFCH</strong> — Distribution Finance Capital (AIM)</span>
+      <span>
+        target
+        <input type="number" class="growth-input" step="0.5" value="15" data-tk="DFCH">%
+        <button class="save-target" data-tk="DFCH">Save</button>
+      </span>
+      <button class="remove" data-tk="DFCH">Remove</button>
+    </li>
+    
+    <li data-tk="212A.T">
+      <span><strong>212A.T</strong> — Fit Easy (Tokyo)</span>
+      <span>
+        target
+        <input type="number" class="growth-input" step="0.5" value="30" data-tk="212A.T">%
+        <button class="save-target" data-tk="212A.T">Save</button>
+      </span>
+      <button class="remove" data-tk="212A.T">Remove</button>
+    </li>
+    
+    <li data-tk="UBER">
+      <span><strong>UBER</strong> — Uber (Nasdaq)</span>
+      <span>
+        target
+        <input type="number" class="growth-input" step="0.5" value="20" data-tk="UBER">%
+        <button class="save-target" data-tk="UBER">Save</button>
+      </span>
+      <button class="remove" data-tk="UBER">Remove</button>
+    </li>
+    
+    <li data-tk="GRBK">
+      <span><strong>GRBK</strong> — Green Brick Partners (Nyse)</span>
+      <span>
+        target
+        <input type="number" class="growth-input" step="0.5" value="15" data-tk="GRBK">%
+        <button class="save-target" data-tk="GRBK">Save</button>
+      </span>
+      <button class="remove" data-tk="GRBK">Remove</button>
+    </li>
     
   </ul>
   <form id="add-form">
@@ -59,7 +199,7 @@ const GH_OWNER = "seda21-doggg";
 const GH_REPO = "Watchlist";
 const FILE_PATH = "watchlist.json";
 const TOKEN_KEY = "watchlist_gh_pat";
-let currentList = [];
+let currentList = [{"co": "Distribution Finance Capital", "ex": "AIM", "expected_eps_growth_pct": 15, "tk": "DFCH"}, {"co": "Fit Easy", "ex": "Tokyo", "expected_eps_growth_pct": 30, "tk": "212A.T"}, {"co": "Uber", "ex": "Nasdaq", "expected_eps_growth_pct": 20, "tk": "UBER"}, {"co": "Green Brick Partners", "ex": "Nyse", "expected_eps_growth_pct": 15, "tk": "GRBK"}];
 
 function getToken() {
   let token = localStorage.getItem(TOKEN_KEY);
